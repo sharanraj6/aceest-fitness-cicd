@@ -29,7 +29,7 @@
             <select id="program">
                 {% for prog in programs %}
                 <option value="{{ prog }}">{{ prog }}</option>
-                {% endfr %}
+                {% endfor %}
             </select>
             <button onclick="saveClient()">Save Client</button>
             <p id="status"></p>
