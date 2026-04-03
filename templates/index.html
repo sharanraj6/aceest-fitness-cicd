@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACEest Fitness</title>
+    <style>
+        body { background-color: #1a1a1a; color: white; font-family: Arial, sans-serif; margin: 0; }
+        header { background-color: #d4af37; color: black; padding: 20px; text-align: center; }
+        .container { display: flex; padding: 20px; gap: 20px; }
+        .panel { background-color: #333; padding: 20px; border-radius: 8px; flex: 1; border: 1px solid #d4af37; }
+        input, select, button { display: block; width: 100%; margin: 10px 0; padding: 10px; box-sizing: border-box; }
+        button { background-color: #d4af37; color: black; font-weight: bold; border: none; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #555; padding: 8px; text-align: left; }
+        th { background-color: #d4af37; color: black; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ACEest Functional Fitness System</h1>
+    </header>
+    <div class="container">
+        <div class="panel">
+            <h2>Add New Client</h2>
+            <input type="text" id="name" placeholder="Client Name" required>
+            <input type="number" id="age" placeholder="Age">
+            <input type="number" id="weight" placeholder="Weight (kg)" required>
+            <select id="program">
+                {% for prog in programs %}
+                <option value="{{ prog }}">{{ prog }}</option>
+                {% endfr %}
+            </select>
+            <button onclick="saveClient()">Save Client</button>
+            <p id="status"></p>
+        </div>
+
+        <div class="panel">
+            <h2>Client Summary</h2>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Weight</th>
+                    <th>Program</th>
+                    <th>Calories/Day</th>
+                </tr>
+                {% for client in clients %}
+                <tr>
+                    <td>{{ client[0] }}</td>
+                    <td>{{ client[1] }}</td>
+                    <td>{{ client[2] }} kg</td>
+                    <td>{{ client[3] }}</td>
+                    <td>{{ client[4] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function saveClient() {
+            const data = {
+                name: document.getElementById('name').value,
+                age: document.getElementById('age').value,
+                weight: document.getElementById('weight').value,
+                program: document.getElementById('program').value
+            };
+
+            fetch('/add_client', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.error) {
+                    document.getElementById('status').innerText = "Error: " + data.error;
+                    document.getElementById('status').style.color = "red";
+                } else {
+                    document.getElementById('status').innerText = "Success! Calories: " + data.calories;
+                    document.getElementById('status').style.color = "#d4af37";
+                    setTimeout(() => location.reload(), 1500); // Reload to update table
+                }
+            });
+        }
+    </script>
+</body>
+</html>

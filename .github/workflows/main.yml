@@ -1,0 +1,47 @@
+name: ACEest CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Lint with Flake8
+      run: |
+        # Check for syntax errors and undefined names
+        flake8 app.py test_app.py --count --select=E9,F63,F7,F82 --show-source --statistics
+
+    - name: Execute Local Pytest
+      run: |
+        pytest test_app.py
+
+  docker-build-and-test:
+    needs: build-lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Docker Image Assembly
+      run: docker build -t aceest-flask-app:latest .
+
+    - name: Automated Testing (Inside Containerized Environment)
+      run: |
+        docker run aceest-flask-app:latest pytest test_app.py

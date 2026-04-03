@@ -1,39 +1,77 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
+import sqlite3
+import os
 
 app = Flask(__name__)
+DB_NAME = "aceest_fitness.db"
 
-# Business logic extracted from Aceestver scripts
 PROGRAMS = {
     "Fat Loss (FL)": {"factor": 22},
     "Muscle Gain (MG)": {"factor": 35},
     "Beginner (BG)": {"factor": 26}
 }
 
+def init_db(db_path=DB_NAME):
+    """Initialize the database with the clients table."""
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS clients (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE,
+            age INTEGER,
+            weight REAL,
+            program TEXT,
+            calories INTEGER
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+# Initialize DB on startup
+init_db()
+
 @app.route('/')
 def home():
-    return jsonify({"message": "Welcome to ACEest Fitness & Gym API"})
+    """Render the main UI and fetch existing clients."""
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    cur.execute("SELECT name, age, weight, program, calories FROM clients")
+    clients = cur.fetchall()
+    conn.close()
+    return render_template('index.html', clients=clients, programs=PROGRAMS.keys())
 
-@app.route('/calculate_calories', methods=['POST'])
-def calculate_calories():
+@app.route('/add_client', methods=['POST'])
+def add_client():
+    """API endpoint to calculate calories and save client to DB."""
     data = request.get_json()
     
-    if not data or 'weight' not in data or 'program' not in data:
-        return jsonify({"error": "Missing weight or program data"}), 400
+    if not data or 'name' not in data or 'weight' not in data or 'program' not in data:
+        return jsonify({"error": "Missing required data"}), 400
 
-    weight = data['weight']
+    name = data['name']
+    age = data.get('age', 0)
+    weight = float(data['weight'])
     program = data['program']
 
     if program not in PROGRAMS:
         return jsonify({"error": "Invalid program selected"}), 400
 
-    # Calculate calories based on the logic from the provided scripts
     calories = int(weight * PROGRAMS[program]["factor"])
     
-    return jsonify({
-        "program": program, 
-        "weight_kg": weight,
-        "target_calories": calories
-    })
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT OR REPLACE INTO clients (name, age, weight, program, calories)
+            VALUES (?, ?, ?, ?, ?)
+        """, (name, age, weight, program, calories))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({"message": "Client saved successfully", "calories": calories}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
