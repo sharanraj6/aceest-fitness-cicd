@@ -15,19 +15,28 @@ To run this application locally on your machine (macOS, Linux, or Windows), foll
 
 ### Setup Steps
 1. **Clone the repository:**
-   git clone <your-github-repo-url>
+   <pre>
+   git clone https://github.com/sharanraj6/aceest-fitness-cicd.git
    cd aceest-devops-assignment
-2. **Create and Activate a Virtual Environment:**
-    On macOS/Linux:
-        python3 -m venv venv
-        source venv/bin/activate
-    On Windows:
+   </pre>
+3. **Create and Activate a Virtual Environment:**
+   <pre>
+   On macOS/Linux: 
+        python3 -m venv venv 
+        source venv/bin/activate 
+   On Windows:
         python -m venv venv
         venv\Scripts\activate
-3. **Install Dependencies:**
-    pip install -r requirements.txt
-4. **Run the Flask Application:**
-    python app.py
+   </pre>
+
+5. **Install Dependencies:**
+   <pre>
+   pip install -r requirements.txt
+   </pre>
+7. **Run the Flask Application:**
+   <pre>
+   python app.py
+   </pre>
 
 ## The application will now be accessible in your web browser at: http://localhost:5000
 
@@ -78,3 +87,11 @@ A Jenkins server is integrated to handle the primary BUILD phase, acting as a se
         docker build -t aceest-flask-app:latest
 
     4. Outcome: If the code compiles, passes tests, and builds into a Docker image successfully, the Jenkins BUILD is marked as passing, ensuring the artifact is ready for the deployment stage.
+
+## 4. Sample Jenkins Screenshot (Running Locally)
+   <img width="750" height="750" alt="Screenshot 2026-04-03 at 17 52 17" src="https://github.com/user-attachments/assets/9e90f58e-7530-4c9e-b84a-dbcb4505155e" />
+
+## 5. The ACEest Functional Fitness System Web UI Screenshot
+   <img width="750" height="750" alt="Screenshot 2026-04-03 at 17 53 20" src="https://github.com/user-attachments/assets/2769d5a3-f738-428e-ac20-557f3999bc98" />
+
+
